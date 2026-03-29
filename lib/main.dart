@@ -1,20 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:anti_gaspi_app/app.dart';
+import 'package:anti_gaspi_app/services/notification_service.dart';
 
-void main() {
-  runApp(const MainApp());
-}
-
-class MainApp extends StatelessWidget {
-  const MainApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return const MaterialApp(
-      home: Scaffold(
-        body: Center(
-          child: Text('Hello World!'),
-        ),
-      ),
-    );
-  }
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await NotificationService.init();
+  runApp(const App());
 }
