@@ -1,8 +1,11 @@
+import 'package:anti_gaspi_app/database/database.dart';
 import 'package:flutter/material.dart';
 import 'package:anti_gaspi_app/router/app_router.dart';
 
 class App extends StatelessWidget {
-  const App({super.key});
+  final AppDatabase database;
+
+  const App({super.key, required this.database});
 
   @override
   Widget build(BuildContext context) {
