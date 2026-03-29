@@ -9,7 +9,7 @@ class Products extends Table {
   TextColumn get name => text()();
   TextColumn get category => text()();
   TextColumn get barcode => text().nullable()();
-  DateTimeColumn get expiryDate => dateTime()();
+  DateTimeColumn get expiryDate => dateTime().nullable()();
   DateTimeColumn get addedDate => dateTime()();
   BoolColumn get isConsumed => boolean().withDefault(const Constant(false))();
 }

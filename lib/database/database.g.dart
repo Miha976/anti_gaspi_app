@@ -59,9 +59,9 @@ class $ProductsTable extends Products with TableInfo<$ProductsTable, Product> {
   late final GeneratedColumn<DateTime> expiryDate = GeneratedColumn<DateTime>(
     'expiry_date',
     aliasedName,
-    false,
+    true,
     type: DriftSqlType.dateTime,
-    requiredDuringInsert: true,
+    requiredDuringInsert: false,
   );
   static const VerificationMeta _addedDateMeta = const VerificationMeta(
     'addedDate',
@@ -141,8 +141,6 @@ class $ProductsTable extends Products with TableInfo<$ProductsTable, Product> {
         _expiryDateMeta,
         expiryDate.isAcceptableOrUnknown(data['expiry_date']!, _expiryDateMeta),
       );
-    } else if (isInserting) {
-      context.missing(_expiryDateMeta);
     }
     if (data.containsKey('added_date')) {
       context.handle(
@@ -186,7 +184,7 @@ class $ProductsTable extends Products with TableInfo<$ProductsTable, Product> {
       expiryDate: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
         data['${effectivePrefix}expiry_date'],
-      )!,
+      ),
       addedDate: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
         data['${effectivePrefix}added_date'],
@@ -209,7 +207,7 @@ class Product extends DataClass implements Insertable<Product> {
   final String name;
   final String category;
   final String? barcode;
-  final DateTime expiryDate;
+  final DateTime? expiryDate;
   final DateTime addedDate;
   final bool isConsumed;
   const Product({
@@ -217,7 +215,7 @@ class Product extends DataClass implements Insertable<Product> {
     required this.name,
     required this.category,
     this.barcode,
-    required this.expiryDate,
+    this.expiryDate,
     required this.addedDate,
     required this.isConsumed,
   });
@@ -230,7 +228,9 @@ class Product extends DataClass implements Insertable<Product> {
     if (!nullToAbsent || barcode != null) {
       map['barcode'] = Variable<String>(barcode);
     }
-    map['expiry_date'] = Variable<DateTime>(expiryDate);
+    if (!nullToAbsent || expiryDate != null) {
+      map['expiry_date'] = Variable<DateTime>(expiryDate);
+    }
     map['added_date'] = Variable<DateTime>(addedDate);
     map['is_consumed'] = Variable<bool>(isConsumed);
     return map;
@@ -244,7 +244,9 @@ class Product extends DataClass implements Insertable<Product> {
       barcode: barcode == null && nullToAbsent
           ? const Value.absent()
           : Value(barcode),
-      expiryDate: Value(expiryDate),
+      expiryDate: expiryDate == null && nullToAbsent
+          ? const Value.absent()
+          : Value(expiryDate),
       addedDate: Value(addedDate),
       isConsumed: Value(isConsumed),
     );
@@ -260,7 +262,7 @@ class Product extends DataClass implements Insertable<Product> {
       name: serializer.fromJson<String>(json['name']),
       category: serializer.fromJson<String>(json['category']),
       barcode: serializer.fromJson<String?>(json['barcode']),
-      expiryDate: serializer.fromJson<DateTime>(json['expiryDate']),
+      expiryDate: serializer.fromJson<DateTime?>(json['expiryDate']),
       addedDate: serializer.fromJson<DateTime>(json['addedDate']),
       isConsumed: serializer.fromJson<bool>(json['isConsumed']),
     );
@@ -273,7 +275,7 @@ class Product extends DataClass implements Insertable<Product> {
       'name': serializer.toJson<String>(name),
       'category': serializer.toJson<String>(category),
       'barcode': serializer.toJson<String?>(barcode),
-      'expiryDate': serializer.toJson<DateTime>(expiryDate),
+      'expiryDate': serializer.toJson<DateTime?>(expiryDate),
       'addedDate': serializer.toJson<DateTime>(addedDate),
       'isConsumed': serializer.toJson<bool>(isConsumed),
     };
@@ -284,7 +286,7 @@ class Product extends DataClass implements Insertable<Product> {
     String? name,
     String? category,
     Value<String?> barcode = const Value.absent(),
-    DateTime? expiryDate,
+    Value<DateTime?> expiryDate = const Value.absent(),
     DateTime? addedDate,
     bool? isConsumed,
   }) => Product(
@@ -292,7 +294,7 @@ class Product extends DataClass implements Insertable<Product> {
     name: name ?? this.name,
     category: category ?? this.category,
     barcode: barcode.present ? barcode.value : this.barcode,
-    expiryDate: expiryDate ?? this.expiryDate,
+    expiryDate: expiryDate.present ? expiryDate.value : this.expiryDate,
     addedDate: addedDate ?? this.addedDate,
     isConsumed: isConsumed ?? this.isConsumed,
   );
@@ -354,7 +356,7 @@ class ProductsCompanion extends UpdateCompanion<Product> {
   final Value<String> name;
   final Value<String> category;
   final Value<String?> barcode;
-  final Value<DateTime> expiryDate;
+  final Value<DateTime?> expiryDate;
   final Value<DateTime> addedDate;
   final Value<bool> isConsumed;
   const ProductsCompanion({
@@ -371,12 +373,11 @@ class ProductsCompanion extends UpdateCompanion<Product> {
     required String name,
     required String category,
     this.barcode = const Value.absent(),
-    required DateTime expiryDate,
+    this.expiryDate = const Value.absent(),
     required DateTime addedDate,
     this.isConsumed = const Value.absent(),
   }) : name = Value(name),
        category = Value(category),
-       expiryDate = Value(expiryDate),
        addedDate = Value(addedDate);
   static Insertable<Product> custom({
     Expression<int>? id,
@@ -403,7 +404,7 @@ class ProductsCompanion extends UpdateCompanion<Product> {
     Value<String>? name,
     Value<String>? category,
     Value<String?>? barcode,
-    Value<DateTime>? expiryDate,
+    Value<DateTime?>? expiryDate,
     Value<DateTime>? addedDate,
     Value<bool>? isConsumed,
   }) {
@@ -831,7 +832,7 @@ typedef $$ProductsTableCreateCompanionBuilder =
       required String name,
       required String category,
       Value<String?> barcode,
-      required DateTime expiryDate,
+      Value<DateTime?> expiryDate,
       required DateTime addedDate,
       Value<bool> isConsumed,
     });
@@ -841,7 +842,7 @@ typedef $$ProductsTableUpdateCompanionBuilder =
       Value<String> name,
       Value<String> category,
       Value<String?> barcode,
-      Value<DateTime> expiryDate,
+      Value<DateTime?> expiryDate,
       Value<DateTime> addedDate,
       Value<bool> isConsumed,
     });
@@ -1003,7 +1004,7 @@ class $$ProductsTableTableManager
                 Value<String> name = const Value.absent(),
                 Value<String> category = const Value.absent(),
                 Value<String?> barcode = const Value.absent(),
-                Value<DateTime> expiryDate = const Value.absent(),
+                Value<DateTime?> expiryDate = const Value.absent(),
                 Value<DateTime> addedDate = const Value.absent(),
                 Value<bool> isConsumed = const Value.absent(),
               }) => ProductsCompanion(
@@ -1021,7 +1022,7 @@ class $$ProductsTableTableManager
                 required String name,
                 required String category,
                 Value<String?> barcode = const Value.absent(),
-                required DateTime expiryDate,
+                Value<DateTime?> expiryDate = const Value.absent(),
                 required DateTime addedDate,
                 Value<bool> isConsumed = const Value.absent(),
               }) => ProductsCompanion.insert(
