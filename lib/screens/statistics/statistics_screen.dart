@@ -22,15 +22,24 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
         .get();
   }
 
-  Map<String, int> _count(
-      List<WasteEvent> events, String Function(WasteEvent) key) {
-    final map = <String, int>{};
-    for (final e in events) {
-      map[key(e)] = (map[key(e)] ?? 0) + 1;
-    }
-    return Map.fromEntries(
-        map.entries.toList()..sort((a, b) => b.value.compareTo(a.value)));
+  double _quantityWeight(String quantity) {
+  switch (quantity) {
+    case 'moitié': return 0.5;
+    case 'un peu': return 0.25;
+    default: return 1.0;
   }
+}
+
+Map<String, double> _countWeighted(
+    List<WasteEvent> events, String Function(WasteEvent) key) {
+  final map = <String, double>{};
+  for (final e in events) {
+    final weight = _quantityWeight(e.quantity);
+    map[key(e)] = (map[key(e)] ?? 0) + weight;
+  }
+  return Map.fromEntries(
+      map.entries.toList()..sort((a, b) => b.value.compareTo(a.value)));
+}
 
   @override
   Widget build(BuildContext context) {
@@ -89,9 +98,9 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                   );
                 }
 
-                final byCategory = _count(events, (e) => e.category);
-                final byReason = _count(events, (e) => e.reason);
-                final byProduct = _count(events, (e) => e.productName);
+                final byCategory = _countWeighted(events, (e) => e.category);
+final byReason = _countWeighted(events, (e) => e.reason);
+final byProduct = _countWeighted(events, (e) => e.productName);
 
                 return ListView(
                   padding: const EdgeInsets.fromLTRB(16, 0, 16, 32),
@@ -206,7 +215,7 @@ class _SummaryTile extends StatelessWidget {
 class _StatCard extends StatelessWidget {
   final String title;
   final IconData icon;
-  final Map<String, int> data;
+  final Map<String, double> data;
   final Color color;
 
   const _StatCard({
@@ -218,7 +227,7 @@ class _StatCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final total = data.values.fold(0, (a, b) => a + b);
+    final total = data.values.fold(0.0, (a, b) => a + b);
 
     return Container(
       padding: const EdgeInsets.all(16),
@@ -274,7 +283,9 @@ class _StatCard extends StatelessWidget {
                         ),
                       ),
                       Text(
-                        '${entry.value}x',
+                        entry.value % 1 == 0
+                            ? '${entry.value.toInt()}x'
+                            : '${entry.value.toStringAsFixed(1)}x',
                         style: TextStyle(
                           fontSize: 13,
                           fontWeight: FontWeight.w600,

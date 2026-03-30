@@ -20,6 +20,7 @@ class WasteEvents extends Table {
   TextColumn get productName => text()();
   TextColumn get category => text()();
   TextColumn get reason => text()();
+  TextColumn get quantity => text().withDefault(const Constant('tout'))();
   DateTimeColumn get date => dateTime()();
 }
 
@@ -28,7 +29,20 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
 
   @override
-  int get schemaVersion => 1;
+  int get schemaVersion => 2;
+
+  @override
+  MigrationStrategy get migration => MigrationStrategy(
+        onUpgrade: (migrator, from, to) async {
+          if (from < 2) {
+            await migrator.addColumn(
+              wasteEvents,
+              wasteEvents.quantity,
+            );
+          }
+        },
+      );
+
 
   static QueryExecutor _openConnection() {
     return driftDatabase(name: 'anti_gaspi_db');

@@ -511,6 +511,18 @@ class $WasteEventsTable extends WasteEvents
     type: DriftSqlType.string,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _quantityMeta = const VerificationMeta(
+    'quantity',
+  );
+  @override
+  late final GeneratedColumn<String> quantity = GeneratedColumn<String>(
+    'quantity',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('tout'),
+  );
   static const VerificationMeta _dateMeta = const VerificationMeta('date');
   @override
   late final GeneratedColumn<DateTime> date = GeneratedColumn<DateTime>(
@@ -526,6 +538,7 @@ class $WasteEventsTable extends WasteEvents
     productName,
     category,
     reason,
+    quantity,
     date,
   ];
   @override
@@ -570,6 +583,12 @@ class $WasteEventsTable extends WasteEvents
     } else if (isInserting) {
       context.missing(_reasonMeta);
     }
+    if (data.containsKey('quantity')) {
+      context.handle(
+        _quantityMeta,
+        quantity.isAcceptableOrUnknown(data['quantity']!, _quantityMeta),
+      );
+    }
     if (data.containsKey('date')) {
       context.handle(
         _dateMeta,
@@ -603,6 +622,10 @@ class $WasteEventsTable extends WasteEvents
         DriftSqlType.string,
         data['${effectivePrefix}reason'],
       )!,
+      quantity: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}quantity'],
+      )!,
       date: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
         data['${effectivePrefix}date'],
@@ -621,12 +644,14 @@ class WasteEvent extends DataClass implements Insertable<WasteEvent> {
   final String productName;
   final String category;
   final String reason;
+  final String quantity;
   final DateTime date;
   const WasteEvent({
     required this.id,
     required this.productName,
     required this.category,
     required this.reason,
+    required this.quantity,
     required this.date,
   });
   @override
@@ -636,6 +661,7 @@ class WasteEvent extends DataClass implements Insertable<WasteEvent> {
     map['product_name'] = Variable<String>(productName);
     map['category'] = Variable<String>(category);
     map['reason'] = Variable<String>(reason);
+    map['quantity'] = Variable<String>(quantity);
     map['date'] = Variable<DateTime>(date);
     return map;
   }
@@ -646,6 +672,7 @@ class WasteEvent extends DataClass implements Insertable<WasteEvent> {
       productName: Value(productName),
       category: Value(category),
       reason: Value(reason),
+      quantity: Value(quantity),
       date: Value(date),
     );
   }
@@ -660,6 +687,7 @@ class WasteEvent extends DataClass implements Insertable<WasteEvent> {
       productName: serializer.fromJson<String>(json['productName']),
       category: serializer.fromJson<String>(json['category']),
       reason: serializer.fromJson<String>(json['reason']),
+      quantity: serializer.fromJson<String>(json['quantity']),
       date: serializer.fromJson<DateTime>(json['date']),
     );
   }
@@ -671,6 +699,7 @@ class WasteEvent extends DataClass implements Insertable<WasteEvent> {
       'productName': serializer.toJson<String>(productName),
       'category': serializer.toJson<String>(category),
       'reason': serializer.toJson<String>(reason),
+      'quantity': serializer.toJson<String>(quantity),
       'date': serializer.toJson<DateTime>(date),
     };
   }
@@ -680,12 +709,14 @@ class WasteEvent extends DataClass implements Insertable<WasteEvent> {
     String? productName,
     String? category,
     String? reason,
+    String? quantity,
     DateTime? date,
   }) => WasteEvent(
     id: id ?? this.id,
     productName: productName ?? this.productName,
     category: category ?? this.category,
     reason: reason ?? this.reason,
+    quantity: quantity ?? this.quantity,
     date: date ?? this.date,
   );
   WasteEvent copyWithCompanion(WasteEventsCompanion data) {
@@ -696,6 +727,7 @@ class WasteEvent extends DataClass implements Insertable<WasteEvent> {
           : this.productName,
       category: data.category.present ? data.category.value : this.category,
       reason: data.reason.present ? data.reason.value : this.reason,
+      quantity: data.quantity.present ? data.quantity.value : this.quantity,
       date: data.date.present ? data.date.value : this.date,
     );
   }
@@ -707,13 +739,15 @@ class WasteEvent extends DataClass implements Insertable<WasteEvent> {
           ..write('productName: $productName, ')
           ..write('category: $category, ')
           ..write('reason: $reason, ')
+          ..write('quantity: $quantity, ')
           ..write('date: $date')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(id, productName, category, reason, date);
+  int get hashCode =>
+      Object.hash(id, productName, category, reason, quantity, date);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -722,6 +756,7 @@ class WasteEvent extends DataClass implements Insertable<WasteEvent> {
           other.productName == this.productName &&
           other.category == this.category &&
           other.reason == this.reason &&
+          other.quantity == this.quantity &&
           other.date == this.date);
 }
 
@@ -730,12 +765,14 @@ class WasteEventsCompanion extends UpdateCompanion<WasteEvent> {
   final Value<String> productName;
   final Value<String> category;
   final Value<String> reason;
+  final Value<String> quantity;
   final Value<DateTime> date;
   const WasteEventsCompanion({
     this.id = const Value.absent(),
     this.productName = const Value.absent(),
     this.category = const Value.absent(),
     this.reason = const Value.absent(),
+    this.quantity = const Value.absent(),
     this.date = const Value.absent(),
   });
   WasteEventsCompanion.insert({
@@ -743,6 +780,7 @@ class WasteEventsCompanion extends UpdateCompanion<WasteEvent> {
     required String productName,
     required String category,
     required String reason,
+    this.quantity = const Value.absent(),
     required DateTime date,
   }) : productName = Value(productName),
        category = Value(category),
@@ -753,6 +791,7 @@ class WasteEventsCompanion extends UpdateCompanion<WasteEvent> {
     Expression<String>? productName,
     Expression<String>? category,
     Expression<String>? reason,
+    Expression<String>? quantity,
     Expression<DateTime>? date,
   }) {
     return RawValuesInsertable({
@@ -760,6 +799,7 @@ class WasteEventsCompanion extends UpdateCompanion<WasteEvent> {
       if (productName != null) 'product_name': productName,
       if (category != null) 'category': category,
       if (reason != null) 'reason': reason,
+      if (quantity != null) 'quantity': quantity,
       if (date != null) 'date': date,
     });
   }
@@ -769,6 +809,7 @@ class WasteEventsCompanion extends UpdateCompanion<WasteEvent> {
     Value<String>? productName,
     Value<String>? category,
     Value<String>? reason,
+    Value<String>? quantity,
     Value<DateTime>? date,
   }) {
     return WasteEventsCompanion(
@@ -776,6 +817,7 @@ class WasteEventsCompanion extends UpdateCompanion<WasteEvent> {
       productName: productName ?? this.productName,
       category: category ?? this.category,
       reason: reason ?? this.reason,
+      quantity: quantity ?? this.quantity,
       date: date ?? this.date,
     );
   }
@@ -795,6 +837,9 @@ class WasteEventsCompanion extends UpdateCompanion<WasteEvent> {
     if (reason.present) {
       map['reason'] = Variable<String>(reason.value);
     }
+    if (quantity.present) {
+      map['quantity'] = Variable<String>(quantity.value);
+    }
     if (date.present) {
       map['date'] = Variable<DateTime>(date.value);
     }
@@ -808,6 +853,7 @@ class WasteEventsCompanion extends UpdateCompanion<WasteEvent> {
           ..write('productName: $productName, ')
           ..write('category: $category, ')
           ..write('reason: $reason, ')
+          ..write('quantity: $quantity, ')
           ..write('date: $date')
           ..write(')'))
         .toString();
@@ -1062,6 +1108,7 @@ typedef $$WasteEventsTableCreateCompanionBuilder =
       required String productName,
       required String category,
       required String reason,
+      Value<String> quantity,
       required DateTime date,
     });
 typedef $$WasteEventsTableUpdateCompanionBuilder =
@@ -1070,6 +1117,7 @@ typedef $$WasteEventsTableUpdateCompanionBuilder =
       Value<String> productName,
       Value<String> category,
       Value<String> reason,
+      Value<String> quantity,
       Value<DateTime> date,
     });
 
@@ -1099,6 +1147,11 @@ class $$WasteEventsTableFilterComposer
 
   ColumnFilters<String> get reason => $composableBuilder(
     column: $table.reason,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get quantity => $composableBuilder(
+    column: $table.quantity,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -1137,6 +1190,11 @@ class $$WasteEventsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get quantity => $composableBuilder(
+    column: $table.quantity,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<DateTime> get date => $composableBuilder(
     column: $table.date,
     builder: (column) => ColumnOrderings(column),
@@ -1165,6 +1223,9 @@ class $$WasteEventsTableAnnotationComposer
 
   GeneratedColumn<String> get reason =>
       $composableBuilder(column: $table.reason, builder: (column) => column);
+
+  GeneratedColumn<String> get quantity =>
+      $composableBuilder(column: $table.quantity, builder: (column) => column);
 
   GeneratedColumn<DateTime> get date =>
       $composableBuilder(column: $table.date, builder: (column) => column);
@@ -1205,12 +1266,14 @@ class $$WasteEventsTableTableManager
                 Value<String> productName = const Value.absent(),
                 Value<String> category = const Value.absent(),
                 Value<String> reason = const Value.absent(),
+                Value<String> quantity = const Value.absent(),
                 Value<DateTime> date = const Value.absent(),
               }) => WasteEventsCompanion(
                 id: id,
                 productName: productName,
                 category: category,
                 reason: reason,
+                quantity: quantity,
                 date: date,
               ),
           createCompanionCallback:
@@ -1219,12 +1282,14 @@ class $$WasteEventsTableTableManager
                 required String productName,
                 required String category,
                 required String reason,
+                Value<String> quantity = const Value.absent(),
                 required DateTime date,
               }) => WasteEventsCompanion.insert(
                 id: id,
                 productName: productName,
                 category: category,
                 reason: reason,
+                quantity: quantity,
                 date: date,
               ),
           withReferenceMapper: (p0) => p0
