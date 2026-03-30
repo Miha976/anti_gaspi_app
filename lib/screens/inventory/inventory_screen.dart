@@ -29,7 +29,12 @@ class InventoryScreen extends StatelessWidget {
     final db = context.read<AppDatabase>();
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Inventaire')),
+      appBar: AppBar(title: const Text('Inventaire'),actions: [
+    IconButton(
+      icon: const Icon(Icons.bar_chart),
+      onPressed: () => context.push('/stats'),
+    ),
+  ],),
       body: StreamBuilder<List<Product>>(
         stream:
             (db.select(db.products)
