@@ -74,7 +74,8 @@ lib/
 
 ### Phase 2 — Enrichissement *(en cours)*
 - Quantité jetée (tout / moitié / un peu)
-- Amélioration des statistiques et export
+- Amélioration des statistiques
+- Phase de test avec des données réelles *(on est ici)*
 
 ### Phase 3 — Multi-utilisateurs
 - Comptes individuels liés à un foyer
