@@ -157,7 +157,9 @@ class InventoryScreen extends StatelessWidget {
                   return false;
                 },
                 child: Card(
-                  child: Padding(
+                  child: GestureDetector(
+                    onTap: () => context.push('/product/${product.id}'),
+                    child: Padding(
                     padding: const EdgeInsets.symmetric(
                       horizontal: 16,
                       vertical: 14,
@@ -231,6 +233,7 @@ class InventoryScreen extends StatelessWidget {
                       ],
                     ),
                   ),
+                  )
                 ),
               );
             },
