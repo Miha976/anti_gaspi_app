@@ -7,21 +7,60 @@ import 'package:anti_gaspi_app/database/database.dart';
 class InventoryScreen extends StatelessWidget {
   const InventoryScreen({super.key});
 
-  Color _expiryColor(DateTime? expiryDate) {
-    if (expiryDate == null) return Colors.grey;
+  _ExpiryInfo _expiryInfo(DateTime? expiryDate) {
+    if (expiryDate == null) {
+      return _ExpiryInfo(
+        label: 'Pas de DLC',
+        color: const Color(0xFF9E9E9E),
+        backgroundColor: const Color(0xFFF5F5F5),
+      );
+    }
     final days = expiryDate.difference(DateTime.now()).inDays;
-    if (days <= 2) return Colors.red;
-    if (days <= 5) return Colors.orange;
-    return Colors.green;
+    if (days < 0) {
+      return _ExpiryInfo(
+        label: 'Périmé',
+        color: Colors.white,
+        backgroundColor: const Color(0xFFE07A5F),
+      );
+    }
+    if (days == 0) {
+      return _ExpiryInfo(
+        label: 'Expire aujourd\'hui',
+        color: Colors.white,
+        backgroundColor: const Color(0xFFE07A5F),
+      );
+    }
+    if (days <= 3) {
+      return _ExpiryInfo(
+        label: 'Dans $days jour${days > 1 ? 's' : ''}',
+        color: const Color(0xFF7B3F00),
+        backgroundColor: const Color(0xFFFFF0E6),
+      );
+    }
+    return _ExpiryInfo(
+      label: 'Dans $days jours',
+      color: const Color(0xFF2D6A4F),
+      backgroundColor: const Color(0xFFE8F5EE),
+    );
   }
 
-  String _expiryLabel(DateTime? expiryDate) {
-    if (expiryDate == null) return 'Pas de DLC';
-    final days = expiryDate.difference(DateTime.now()).inDays;
-    if (days < 0) return 'Périmé';
-    if (days == 0) return 'Expire aujourd\'hui';
-    if (days == 1) return 'Expire demain';
-    return 'Expire dans $days jours';
+  IconData _categoryIcon(String category) {
+    switch (category) {
+      case 'Légumes':
+        return Icons.eco_outlined;
+      case 'Fruits':
+        return Icons.lunch_dining_outlined;
+      case 'Produits laitiers':
+        return Icons.water_drop_outlined;
+      case 'Viandes et poissons':
+        return Icons.set_meal_outlined;
+      case 'Boissons':
+        return Icons.local_drink_outlined;
+      case 'Restes cuisinés':
+        return Icons.restaurant_outlined;
+      default:
+        return Icons.inventory_2_outlined;
+    }
   }
 
   @override
@@ -30,12 +69,13 @@ class InventoryScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Inventaire'),
+        title: const Text('Mon frigo'),
         actions: [
           IconButton(
-            icon: const Icon(Icons.bar_chart),
+            icon: const Icon(Icons.bar_chart_rounded),
             onPressed: () => context.push('/stats'),
           ),
+          const SizedBox(width: 8),
         ],
       ),
       body: StreamBuilder<List<Product>>(
@@ -57,35 +97,55 @@ class InventoryScreen extends StatelessWidget {
           final products = snapshot.data ?? [];
 
           if (products.isEmpty) {
-            return const Center(
-              child: Text('Aucun produit dans l\'inventaire.'),
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.kitchen_outlined,
+                    size: 64,
+                    color: Colors.grey.shade300,
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    'Frigo vide',
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.grey.shade400,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Ajoute tes courses pour commencer',
+                    style: TextStyle(fontSize: 14, color: Colors.grey.shade400),
+                  ),
+                ],
+              ),
             );
           }
 
           return ListView.builder(
+            padding: const EdgeInsets.only(top: 8, bottom: 100),
             itemCount: products.length,
             itemBuilder: (context, index) {
               final product = products[index];
-              final color = _expiryColor(product.expiryDate);
-              final label = _expiryLabel(product.expiryDate);
+              final info = _expiryInfo(product.expiryDate);
 
               return Dismissible(
                 key: ValueKey(product.id),
-                background: Container(
-                  color: Colors.green,
+                background: _SwipeBackground(
+                  color: const Color(0xFF2D6A4F),
+                  icon: Icons.check_rounded,
                   alignment: Alignment.centerLeft,
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                  child: const Icon(Icons.check, color: Colors.white),
                 ),
-                secondaryBackground: Container(
-                  color: Colors.red,
+                secondaryBackground: _SwipeBackground(
+                  color: const Color(0xFFE07A5F),
+                  icon: Icons.delete_outline_rounded,
                   alignment: Alignment.centerRight,
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                  child: const Icon(Icons.delete_outline, color: Colors.white),
                 ),
                 confirmDismiss: (direction) async {
                   if (direction == DismissDirection.startToEnd) {
-                    final db = context.read<AppDatabase>();
                     await (db.update(
                       db.products,
                     )..where((p) => p.id.equals(product.id))).write(
@@ -96,13 +156,80 @@ class InventoryScreen extends StatelessWidget {
                   }
                   return false;
                 },
-                child: ListTile(
-                  leading: CircleAvatar(backgroundColor: color, radius: 8),
-                  title: Text(product.name),
-                  subtitle: Text(product.category),
-                  trailing: Text(
-                    label,
-                    style: TextStyle(color: color, fontSize: 12),
+                child: Card(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 14,
+                    ),
+                    child: Row(
+                      children: [
+                        Container(
+                          width: 44,
+                          height: 44,
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFE8F5EE),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Icon(
+                            _categoryIcon(product.category),
+                            color: const Color(0xFF2D6A4F),
+                            size: 22,
+                          ),
+                        ),
+                        const SizedBox(width: 14),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                product.name,
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                                style: const TextStyle(
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.w600,
+                                  color: Color(0xFF1A1A1A),
+                                ),
+                              ),
+                              const SizedBox(height: 2),
+                              Text(
+                                product.category,
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  color: Colors.grey.shade500,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        ConstrainedBox(
+                          constraints: const BoxConstraints(maxWidth: 130),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 10,
+                              vertical: 5,
+                            ),
+                            decoration: BoxDecoration(
+                              color: info.backgroundColor,
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: Text(
+                              info.label,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w600,
+                                color: info.color,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               );
@@ -110,10 +237,51 @@ class InventoryScreen extends StatelessWidget {
           );
         },
       ),
-      floatingActionButton: FloatingActionButton(
+      floatingActionButton: FloatingActionButton.extended(
         onPressed: () => context.push('/add'),
-        child: const Icon(Icons.add),
+        icon: const Icon(Icons.add_rounded),
+        label: const Text(
+          'Ajouter',
+          style: TextStyle(fontWeight: FontWeight.w600),
+        ),
       ),
+    );
+  }
+}
+
+class _ExpiryInfo {
+  final String label;
+  final Color color;
+  final Color backgroundColor;
+  _ExpiryInfo({
+    required this.label,
+    required this.color,
+    required this.backgroundColor,
+  });
+}
+
+class _SwipeBackground extends StatelessWidget {
+  final Color color;
+  final IconData icon;
+  final Alignment alignment;
+
+  const _SwipeBackground({
+    required this.color,
+    required this.icon,
+    required this.alignment,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+      decoration: BoxDecoration(
+        color: color,
+        borderRadius: BorderRadius.circular(16),
+      ),
+      alignment: alignment,
+      padding: const EdgeInsets.symmetric(horizontal: 24),
+      child: Icon(icon, color: Colors.white, size: 26),
     );
   }
 }
