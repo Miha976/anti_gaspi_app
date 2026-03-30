@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
-import 'package:drift/drift.dart' show OrderingTerm, OrderingMode;
+import 'package:drift/drift.dart' show OrderingTerm, OrderingMode, Value;
 import 'package:anti_gaspi_app/database/database.dart';
 
 class InventoryScreen extends StatelessWidget {
@@ -29,12 +29,15 @@ class InventoryScreen extends StatelessWidget {
     final db = context.read<AppDatabase>();
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Inventaire'),actions: [
-    IconButton(
-      icon: const Icon(Icons.bar_chart),
-      onPressed: () => context.push('/stats'),
-    ),
-  ],),
+      appBar: AppBar(
+        title: const Text('Inventaire'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.bar_chart),
+            onPressed: () => context.push('/stats'),
+          ),
+        ],
+      ),
       body: StreamBuilder<List<Product>>(
         stream:
             (db.select(db.products)
@@ -68,15 +71,29 @@ class InventoryScreen extends StatelessWidget {
 
               return Dismissible(
                 key: ValueKey(product.id),
-                direction: DismissDirection.startToEnd,
                 background: Container(
-                  color: Colors.red,
+                  color: Colors.green,
                   alignment: Alignment.centerLeft,
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  child: const Icon(Icons.check, color: Colors.white),
+                ),
+                secondaryBackground: Container(
+                  color: Colors.red,
+                  alignment: Alignment.centerRight,
                   padding: const EdgeInsets.symmetric(horizontal: 20),
                   child: const Icon(Icons.delete_outline, color: Colors.white),
                 ),
-                confirmDismiss: (_) async {
-                  context.push('/waste/${product.id}');
+                confirmDismiss: (direction) async {
+                  if (direction == DismissDirection.startToEnd) {
+                    final db = context.read<AppDatabase>();
+                    await (db.update(
+                      db.products,
+                    )..where((p) => p.id.equals(product.id))).write(
+                      const ProductsCompanion(isConsumed: Value(true)),
+                    );
+                  } else {
+                    context.push('/waste/${product.id}');
+                  }
                   return false;
                 },
                 child: ListTile(
