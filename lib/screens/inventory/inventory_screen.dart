@@ -31,15 +31,16 @@ class InventoryScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(title: const Text('Inventaire')),
       body: StreamBuilder<List<Product>>(
-        stream: (db.select(db.products)
-              ..where((p) => p.isConsumed.equals(false))
-              ..orderBy([
-                (p) => OrderingTerm(
+        stream:
+            (db.select(db.products)
+                  ..where((p) => p.isConsumed.equals(false))
+                  ..orderBy([
+                    (p) => OrderingTerm(
                       expression: p.expiryDate,
                       mode: OrderingMode.asc,
-                    )
-              ]))
-            .watch(),
+                    ),
+                  ]))
+                .watch(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
@@ -60,16 +61,27 @@ class InventoryScreen extends StatelessWidget {
               final color = _expiryColor(product.expiryDate);
               final label = _expiryLabel(product.expiryDate);
 
-              return ListTile(
-                leading: CircleAvatar(
-                  backgroundColor: color,
-                  radius: 8,
+              return Dismissible(
+                key: ValueKey(product.id),
+                direction: DismissDirection.startToEnd,
+                background: Container(
+                  color: Colors.red,
+                  alignment: Alignment.centerLeft,
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  child: const Icon(Icons.delete_outline, color: Colors.white),
                 ),
-                title: Text(product.name),
-                subtitle: Text(product.category),
-                trailing: Text(
-                  label,
-                  style: TextStyle(color: color, fontSize: 12),
+                confirmDismiss: (_) async {
+                  context.push('/waste/${product.id}');
+                  return false;
+                },
+                child: ListTile(
+                  leading: CircleAvatar(backgroundColor: color, radius: 8),
+                  title: Text(product.name),
+                  subtitle: Text(product.category),
+                  trailing: Text(
+                    label,
+                    style: TextStyle(color: color, fontSize: 12),
+                  ),
                 ),
               );
             },
