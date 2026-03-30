@@ -66,13 +66,13 @@ lib/
 
 ## 🗺️ Roadmap
 
-### Phase 1 — MVP *(en cours)*
+### Phase 1 — MVP *(Terminée)*
 - Inventaire avec tri par péremption
 - Saisie produit (scan + manuel)
 - Déclaration de jet avec raison
 - Statistiques sur 7 / 14 / 30 jours
 
-### Phase 2 — Enrichissement
+### Phase 2 — Enrichissement *(en cours)*
 - Quantité jetée (tout / moitié / un peu)
 - Amélioration des statistiques et export
 
