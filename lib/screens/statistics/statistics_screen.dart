@@ -41,12 +41,47 @@ Map<String, double> _countWeighted(
       map.entries.toList()..sort((a, b) => b.value.compareTo(a.value)));
 }
 
+Future<void> _resetStats(BuildContext context, AppDatabase db) async {
+  final confirm = await showDialog<bool>(
+    context: context,
+    builder: (context) => AlertDialog(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      title: const Text('Réinitialiser les statistiques ?'),
+      content: const Text(
+          'Tous les jets enregistrés seront supprimés définitivement.'),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(false),
+          child: const Text('Annuler'),
+        ),
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(true),
+          style: TextButton.styleFrom(
+              foregroundColor: const Color(0xFFE07A5F)),
+          child: const Text('Réinitialiser'),
+        ),
+      ],
+    ),
+  );
+
+  if (confirm == true) {
+    await db.delete(db.wasteEvents).go();
+    setState(() {});
+  }
+}
+
   @override
   Widget build(BuildContext context) {
     final db = context.read<AppDatabase>();
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Statistiques')),
+      appBar: AppBar(title: const Text('Statistiques'), actions: [
+    IconButton(
+      icon: const Icon(Icons.delete_sweep_outlined, color: Color(0xFFE07A5F)),
+      onPressed: () => _resetStats(context, db),
+    ),
+    const SizedBox(width: 8),
+  ],),
       body: Column(
         children: [
           Padding(
