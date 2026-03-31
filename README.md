@@ -40,16 +40,19 @@ L'application est en phase de test réel (usage quotidien) depuis début 2025.
 ## Illustrations
 
 ### Écran principal — liste du frigo
-![Liste frigo](assets/screenshots/home.png)
+![Liste frigo](assets/screenshots/home.jpg)
 
 ### Scan d'un produit
-![Scan](assets/screenshots/scan.png)
+![Scan](assets/screenshots/scan.jpg)
 
 ### Statistiques
-![Stats](assets/screenshots/stats.png)
+![Stats](assets/screenshots/stats.jpg)
 
-### Notifications
-![Notifications](assets/screenshots/notif.png)
+### Déclarer un jet
+![Jet](assets/screenshots/waste.jpg)
+
+<!-- ### Notifications
+![Notifications](assets/screenshots/notif.png) -->
 
 ---
 
