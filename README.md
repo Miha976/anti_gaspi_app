@@ -1,109 +1,62 @@
-# 🥦 FridgeFlow (AntiGaspiApp)
+# FridgeFlow
 
-> Réduire le gaspillage alimentaire en rendant les pertes visibles, mesurables et comprises par tout le foyer.
-
-![Status](https://img.shields.io/badge/statut-en%20développement-orange)
-![Flutter](https://img.shields.io/badge/Flutter-3.x-blue?logo=flutter)
-![Platform](https://img.shields.io/badge/platform-Android%20%7C%20iOS-lightgrey)
+Application mobile anti-gaspi alimentaire développée avec Flutter.  
+Objectif : réduire les pertes alimentaires en suivant les produits du frigo et en anticipant les dates de péremption.
 
 ---
 
-## 🧩 Contexte
+## Contexte
 
-Dans un foyer partagé, le gaspillage alimentaire reste invisible. On ne sait pas précisément ce qui est dans le frigo, ce qui va périmer, ni combien on jette réellement chaque semaine.
-
-**On ne change pas ce qu'on ne mesure pas.**
-
-FridgeFlow part d'un principe simple : rendre le jet d'un aliment visible et traçable. À partir de cette donnée brute, l'application calcule automatiquement le taux de gaspillage, les catégories les plus concernées, et l'estimation financière des pertes — pour sensibiliser tous les membres du foyer.
+Projet personnel lancé pour apprendre Flutter de A à Z, en partant d'un problème concret du quotidien.  
+L'application est en phase de test réel (usage quotidien) depuis début 2025.
 
 ---
 
-## ✨ Fonctionnalités
+## Fonctionnalités
 
-- **Inventaire partagé** — suivi des produits du foyer triés par date de péremption, avec indicateur visuel de criticité
-- **Saisie hybride** — scan de code-barre (Open Food Facts) ou saisie manuelle
-- **Déclaration de jet** — enregistrer ce qui est jeté et pourquoi (Périmé / Pas aimé / Trop cuisiné / Oublié)
-- **Rappel quotidien** — notification chaque soir pour déclarer les pertes de la journée
-- **Statistiques** — taux de gaspillage, montant estimé, catégories et raisons les plus fréquentes sur 7, 14 ou 30 jours
+- **Scan de codes-barres** — récupération automatique des informations produit via l'API Open Food Facts
+- **Gestion du frigo** — ajout, suppression, swipe pour marquer un produit comme consommé ou gaspillé
+- **Dates de péremption** — suivi visuel avec alertes de proximité
+- **Statistiques** — taux de gaspillage sur plusieurs périodes (semaine, mois, total)
+- **Notifications quotidiennes** — rappels locaux pour les produits proches de leur expiration
+- **Interface redesignée** — palette vert profond / crème / terracotta
 
 ---
 
-## 🛠️ Stack technique
+## Stack technique
 
-| Brique | Solution |
+| Couche | Technologie |
 |---|---|
-| UI multiplateforme | Flutter |
-| Navigation | go_router |
-| Base de données locale | Drift (SQLite) |
-| Scan de code-barre | mobile_scanner |
-| Données produit | Open Food Facts API |
-| Notifications locales | flutter_local_notifications |
-
-Aucun backend. Aucun compte utilisateur. Aucun coût d'infrastructure.
-
----
-
-## 🗂️ Architecture
-
-```
-lib/
-├── main.dart
-├── app.dart
-├── database/
-│   └── database.dart
-├── services/
-│   └── notification_service.dart
-├── router/
-│   └── app_router.dart
-└── screens/
-    ├── inventory/
-    ├── add_product/
-    ├── declare_waste/
-    └── statistics/
-```
+| Framework | Flutter / Dart |
+| Base de données locale | SQLite via Drift |
+| State management | Provider |
+| Scan | flutter_barcode_scanner |
+| Données produits | Open Food Facts API |
+| Notifications | flutter_local_notifications |
+| Versioning | Git / GitHub via VSCode |
 
 ---
 
-## 🗺️ Roadmap
+## Illustrations
 
-### Phase 1 — MVP *(Terminée)*
-- Inventaire avec tri par péremption
-- Saisie produit (scan + manuel)
-- Déclaration de jet avec raison
-- Statistiques sur 7 / 14 / 30 jours
+### Écran principal — liste du frigo
+![Liste frigo](assets/screenshots/home.png)
 
-### Phase 2 — Enrichissement *(en cours)*
-- Quantité jetée (tout / moitié / un peu)
-- Amélioration des statistiques
-- Phase de test avec des données réelles *(on est ici)*
+### Scan d'un produit
+![Scan](assets/screenshots/scan.png)
 
-### Phase 3 — Multi-utilisateurs
-- Comptes individuels liés à un foyer
-- Synchronisation cloud via Supabase
+### Statistiques
+![Stats](assets/screenshots/stats.png)
 
-### Phase 4 — Anticipation
-- Suggestions de recettes à partir de l'inventaire
-- Alertes avant péremption personnalisées
+### Notifications
+![Notifications](assets/screenshots/notif.png)
 
 ---
 
-## 🚀 Lancer le projet
+## Roadmap
 
-### Prérequis
-- Flutter 3.x installé — [flutter.dev](https://flutter.dev/docs/get-started/install)
-- Un émulateur Android/iOS ou un appareil physique
-
-### Installation
-
-```bash
-git clone https://github.com/Miha976/anti_gaspi_app.git
-cd anti_gaspi_app
-flutter pub get
-flutter run
-```
-
----
-
-## 👤 Auteur
-
-Développé par **Chanlang** dans le cadre d'un projet personnel multiplateforme avec Flutter.
+- [x] MVP — ajout, suppression, swipe, notifications
+- [x] Statistiques multi-périodes
+- [x] Refonte UI
+- [ ] Phase 3 — Suggestions de recettes + alertes personnalisées
+- [ ] Phase 4 — Multi-utilisateurs liés à un foyer (Supabase)
